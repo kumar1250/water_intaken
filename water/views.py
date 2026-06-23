@@ -9,7 +9,7 @@ class WaterIntakeView(ViewSet):
 
         try:
             # Load dataset
-            data = pd.read_csv(r"d:\Daily_Water_Intake.csv")
+            data = pd.read_csv(r"D:\internship\water_intaken\Daily_Water_Intake.csv")
 
             # Remove extra spaces from column names
             data.columns = data.columns.str.strip()
