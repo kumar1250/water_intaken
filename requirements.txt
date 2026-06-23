@@ -3,3 +3,5 @@ djangorestframework
 pandas
 django-cors-headers
 numpy
+gunicorn==26.0.0
+packaging==26.2
