@@ -1,7 +1,11 @@
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 import pandas as pd
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+csv_file = BASE_DIR / "Daily_Water_Intake.csv"
 
 class WaterIntakeView(ViewSet):
 
@@ -9,7 +13,7 @@ class WaterIntakeView(ViewSet):
 
         try:
             # Load dataset
-            data = pd.read_csv(r"D:\internship\water_intaken\Daily_Water_Intake.csv")
+            data = pd.read_csv(csv_file)
 
             # Remove extra spaces from column names
             data.columns = data.columns.str.strip()
