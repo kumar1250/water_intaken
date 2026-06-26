@@ -20,12 +20,16 @@ class WaterIntakeView(ViewSet):
 
             gender = str(request.data.get("gender", "")).strip()
             weight = float(request.data.get("weight", 0))
+            age = float(request.data.get("age", 0))
             activity = str(
                 request.data.get("activity_level", "")
             ).strip()
             weather = str(
                 request.data.get("weather", "")
             ).strip()
+
+            # Default hydration level filter
+            hydration_level = "Good"
 
             # Filter data (case-insensitive)
             filtered = data[
@@ -35,17 +39,25 @@ class WaterIntakeView(ViewSet):
                  .astype(str).str.lower() ==
                  activity.lower()) &
                 (data["Weather"].astype(str).str.lower() ==
-                 weather.lower())
+                 weather.lower()) &
+                (data["Hydration Level"].astype(str).str.lower() ==
+                 hydration_level.lower())
             ]
 
-            # If no exact match found, use nearest weights
+            # If no exact match found, use nearest weight + age
             if filtered.empty:
 
-                data["difference"] = abs(
-                    data["Weight (kg)"] - weight
+                pool = data[
+                    data["Hydration Level"].astype(str).str.lower() ==
+                    hydration_level.lower()
+                ].copy()
+
+                pool["difference"] = (
+                    abs(pool["Weight (kg)"] - weight) +
+                    abs(pool["Age"] - age)
                 )
 
-                nearest = data.nsmallest(20, "difference")
+                nearest = pool.nsmallest(20, "difference")
 
                 recommendation = round(
                     float(
@@ -59,14 +71,15 @@ class WaterIntakeView(ViewSet):
                 return Response({
                     "recommended_water_intake": recommendation,
                     "unit": "liters/day",
-                    "note": "Based on nearest weight matches"
+                    "note": "Based on nearest weight/age matches"
                 })
 
             # Exact match found
             filtered = filtered.copy()
 
-            filtered["difference"] = abs(
-                filtered["Weight (kg)"] - weight
+            filtered["difference"] = (
+                abs(filtered["Weight (kg)"] - weight) +
+                abs(filtered["Age"] - age)
             )
 
             nearest = filtered.nsmallest(20, "difference")
